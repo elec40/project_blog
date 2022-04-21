@@ -15,8 +15,13 @@
 
     <style>
         .sign_up_box{
-            margin: 10% auto auto auto;
+            margin: 15% auto auto auto;
             width: 500px;
+            border-width: 2px;
+            border-style: solid;
+            border-color: cornflowerblue;
+            border-radius: 10px;
+            padding: 30px 40px 30px 40px;
         }
         .sign_up_box span{
             width: 50px;
@@ -28,7 +33,7 @@
             margin-top: 15px;
         }
         #input_id{
-            width: 500px;
+            width: 415px;
         }
         #button_search_id{
             width: 90px;
@@ -38,35 +43,77 @@
         }
 
         #btn_create{
-            width: 500px;
+            width: 420px;
             height: 50px;
             margin-top: 15px;
             font-size: 18px;
         }
     </style>
     <script>
-        function search_id() {
-                $.ajax({
-                    type: 'GET',
-                    url: '/search_id',
-                    data: {},
-                    success: function (response) {
-                        alert(response['msg'])
-                    }
-                });
-            }
+        let user_id_check = false
+        let user_id_string_check
 
-            function create_id() {
-                let post_user_id = $('#user-id').val()
+        function check_id() {
+            let post_user_id = $('#user-id').val()
+
+            if(post_user_id == ""){
+                alert("아이디를 입력하세요.")
+            }
+            else if(post_user_id.length < 4 || post_user_id.length > 15){
+                alert("4 ~ 15 글자 범위 내에서 입력하세요.")
+            }
+            else {
                 $.ajax({
                     type: 'POST',
-                    url: '/create_id',
-                    data: {user_id:post_user_id},
+                    url: '/sign_up/check_id',
+                    data: {user_id: post_user_id},
                     success: function (response) {
-                        alert(response['msg']);
+                        if(response['result'] == 1){
+                            alert("사용 가능한 아이디 입니다.")
+                            user_id_check = true
+                            user_id_string_check = post_user_id
+                        }
+                        else if(response['result'] == 2){
+                            alert("이미 존재하는 아이디 입니다.")
+                            user_id_check = false
+                            user_id_string_check = null
+                        }
                     }
                 });
             }
+        }
+
+        function create_id() {
+            let post_user_id = $('#user-id').val()
+            let post_user_password = $('#user-password').val()
+
+            if(post_user_id == ""){
+                alert("아이디를 입력하세요.")
+            }
+            else if(post_user_id.length < 4 || post_user_id.length > 10){
+                alert("아이디를 4 ~ 10 글자 범위 내에서 입력하세요.")
+            }
+            else if(post_user_password == ""){
+                alert("비밀번호를 입력하세요.")
+            }
+            else if(post_user_password.length < 4 || post_user_password.length > 15){
+                alert("비밀번호를 4 ~ 15 글자 범위 내에서 입력하세요.")
+            }
+            else if((user_id_string_check != post_user_id) || (!user_id_check)){
+                alert("아이디 확인을 해주세요.")
+            }
+            else {
+                $.ajax({
+                    type: 'POST',
+                    url: '/sign_up/create_id',
+                    data: {user_id: post_user_id, user_password: post_user_password},
+                    success: function (response) {
+                        alert(response['msg']);
+                        location.href = '/login'
+                    }
+                });
+            }
+        }
     </script>
 </head>
 
@@ -75,11 +122,11 @@
         <div class="input-group flex-nowrap" id="input_id">
             <span class="input-group-text">ID</span>
             <input id="user-id" type="text" class="form-control" placeholder="아이디를 입력하세요" aria-label="Username" aria-describedby="addon-wrapping">
-            <button class="btn btn-outline-secondary" type="button" id="button_search_id" onclick="search_id()">확인</button>
+            <button class="btn btn-outline-secondary" type="button" id="button_search_id" onclick="check_id()">확인</button>
         </div>
         <div class="input-group flex-nowrap" id="input_password">
             <span class="input-group-text">PW</span>
-            <input type="text" class="form-control" placeholder="비밀번호를 입력하세요" aria-label="Username" aria-describedby="addon-wrapping">
+            <input id="user-password" type="password" class="form-control" placeholder="비밀번호를 입력하세요" aria-label="Username" aria-describedby="addon-wrapping">
         </div>
         <button type="button" class="btn btn-primary" id="btn_create" onclick="create_id()">생성</button>
     </div>
